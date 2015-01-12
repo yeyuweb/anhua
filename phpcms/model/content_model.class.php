@@ -277,8 +277,10 @@ class content_model extends model {
 		if(isset($_POST['add_introduce']) && $systeminfo['description'] == '' && isset($modelinfo['content'])) {
 			$content = stripslashes($modelinfo['content']);
 			$introcude_length = intval($_POST['introcude_length']);
+                         if(isset($systeminfo['description'])){
 			$systeminfo['description'] = str_cut(str_replace(array("\r\n","\t",'[page]','[/page]','&ldquo;','&rdquo;','&nbsp;'), '', strip_tags($content)),$introcude_length);
 			$inputinfo['system']['description'] = $systeminfo['description'] = addslashes($systeminfo['description']);
+                         }
 		}
 		//自动提取缩略图
 		if(isset($_POST['auto_thumb']) && $systeminfo['thumb'] == '' && isset($modelinfo['content'])) {
@@ -296,8 +298,12 @@ class content_model extends model {
 			$urls = $this->url->show($id, 0, $systeminfo['catid'], $systeminfo['inputtime'], $data['prefix'],$inputinfo,'edit');
 			$systeminfo['url'] = $urls[0];
 		}
+                 if(isset($systeminfo['description'])){
 		$systeminfo['description'] = str_replace(array('/','\\','#','.',"'"),' ',$systeminfo['description']);
+                 }
+                  if(isset($systeminfo['keywords'])){
 		$systeminfo['keywords'] = str_replace(array('/','\\','#','.',"'"),' ',$systeminfo['keywords']);
+                  }
 		//主表
 		$this->table_name = $this->db_tablepre.$model_tablename;
 		$this->update($systeminfo,array('id'=>$id));
