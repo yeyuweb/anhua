@@ -156,7 +156,32 @@ class content extends admin {
 				$this->page_db->create_html($catid,$_POST['info']);
 				$forward = HTTP_REFERER;
 			}
+			 //更新状态
+                        if($modelid=="12" || $modelid=="14"){
+                         $newdata = getcache("isnew" , "isnew");
+                         if($newdata){
+                             if($modelid=="12"){
+                                $isnewdata['product_isnew']=1;
+                                $isnewdata['expert_isnew']=$newdata['expert_isnew'];
+                             }
+                             if($modelid=="14"){
+                                $isnewdata['product_isnew']=$newdata['product_isnew'];
+                                $isnewdata['expert_isnew']=1;
+                             }
+                         }else{
+                             $isnewdata['product_isnew']=0;
+                             $isnewdata['expert_isnew']=0;
+                             if($modelid=="12"){
+                                $isnewdata['product_isnew']=1;
+                             }
+                            if($modelid=="14"){
+                                $isnewdata['expert_isnew']=1;
+                            }
+                         }
+                        setcache("isnew", $isnewdata, "isnew");
+                        }
 			showmessage(L('add_success'),$forward);
+                       
 		} else {
 			$show_header = $show_dialog = $show_validator = '';
 			//设置cookie 在附件添加处调用
@@ -219,6 +244,30 @@ class content extends admin {
 				$modelid = $this->categorys[$catid]['modelid'];
 				$this->db->set_model($modelid);
 				$this->db->edit_content($_POST['info'],$id);
+                                 //更新状态
+                        if($modelid=="12" || $modelid=="14"){
+                         $newdata = getcache("isnew" , "isnew");
+                         if($newdata){
+                             if($modelid=="12"){
+                                $isnewdata['product_isnew']=1;
+                                $isnewdata['expert_isnew']=$newdata['expert_isnew'];
+                             }
+                             if($modelid=="14"){
+                                $isnewdata['product_isnew']=$newdata['product_isnew'];
+                                $isnewdata['expert_isnew']=1;
+                             }
+                         }else{
+                             $isnewdata['product_isnew']=0;
+                             $isnewdata['expert_isnew']=0;
+                             if($modelid=="12"){
+                                $isnewdata['product_isnew']=1;
+                             }
+                            if($modelid=="14"){
+                                $isnewdata['expert_isnew']=1;
+                            }
+                         }
+                        setcache("isnew", $isnewdata, "isnew");
+                        }
 				if(isset($_POST['dosubmit'])) {
 					showmessage(L('update_success').L('2s_close'),'blank','','','function set_time() {$("#secondid").html(1);}setTimeout("set_time()", 500);setTimeout("window.close()", 1200);');
 				} else {

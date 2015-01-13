@@ -41,56 +41,61 @@ class index {
     }
     //首页产品显示Product display
     public function productDisplay(){
-        $p = safe_replace(filter_input(INPUT_GET, 'page'));
-         if (empty($p)) {
-            $p = 1;
+        $dateline = safe_replace(filter_input(INPUT_GET, 'dateline'));
+         if (empty($dateline)) {
+            $dateline = 0;
         }
-        //获取总数量
-        $sql = "select count(id) as num from ah_chanpin  ";
+        
+        $sql = "select ah_chanpin.id,title,thumb,username,updatetime,price,ah_chanpin_data.content from ah_chanpin left join ah_chanpin_data on ah_chanpin.id= ah_chanpin_data.id where updatetime >'$dateline'  order by listorder desc " ;
         $this->app_model->query($sql);
         $data = $this->app_model->fetch_array();
-        if ($data) {
-            $total = $data[0]['num'];
-        } else {
-            $total = 0;
-        }
-        $sql = "select * from ah_chanpin order by listorder desc " . $this->getpages($p);
-        $this->app_model->query($sql);
-        $data = $this->app_model->fetch_array();
-        $allData['pagecount'] = ceil($total / $this->nums);
         if($data){
             $allData['data']=$data;
         }else{
             $allData['data']=array();
         }
+        $newdata = getcache("isnew" , "isnew");
+         if($newdata){
+            $isnewdata['product_isnew']=0;
+            $isnewdata['expert_isnew']=$newdata['expert_isnew'];
+         }  else {
+            $isnewdata['product_isnew']=0;
+            $isnewdata['expert_isnew']=1;
+         }
+          setcache("isnew", $isnewdata, "isnew");
         echo json_encode($allData);  
     }
     
      //首页专家显示 expert display
     public function expertDisplay(){
-         $p = safe_replace(filter_input(INPUT_GET, 'page'));
-         if (empty($p)) {
-            $p = 1;
+         $dateline = safe_replace(filter_input(INPUT_GET, 'dateline'));
+         if (empty($dateline)) {
+            $dateline = 0;
         }
-        //获取总数量
-        $sql = "select count(id) as num from ah_expert  ";
+        $sql = "select ah_expert.id,title,thumb,username,updatetime,worktime,ah_expert_data.content from ah_expert left join ah_expert_data on ah_expert.id=ah_expert_data.id  order by listorder desc " ;
         $this->app_model->query($sql);
         $data = $this->app_model->fetch_array();
-        if ($data) {
-            $total = $data[0]['num'];
-        } else {
-            $total = 0;
-        }
-        $sql = "select * from ah_expert order by listorder desc " . $this->getpages($p);
-        $this->app_model->query($sql);
-        $data = $this->app_model->fetch_array();
-        $allData['pagecount'] = ceil($total / $this->nums);
         if($data){
             $allData['data']=$data;
         }else{
             $allData['data']=array();
         }
+         $newdata = getcache("isnew" , "isnew");
+         if($newdata){
+            $isnewdata['product_isnew']=$newdata['product_isnew'];
+            $isnewdata['expert_isnew']=0;
+         }  else {
+            $isnewdata['product_isnew']=1;
+            $isnewdata['expert_isnew']=0;
+         }
+          setcache("isnew", $isnewdata, "isnew");
+         
         echo json_encode($allData);  
+    }
+    //检查产品与专家是否更新
+    public function  isnew(){
+         $newdata = getcache("isnew" , "isnew");
+         echo json_encode($newdata);
     }
 
    
