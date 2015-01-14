@@ -21,19 +21,40 @@ class index {
         $limit = " limit " . ($p - 1) * $this->nums . "," . $this->nums;
         return $limit;
     }
+        //获得随机验证串
+    function get_token() {
+        $token = '';
+        while (strlen($token) < 32) {
+            $token .= mt_rand(0, mt_getrandmax());
+        }
+        $token = md5(uniqid($token, TRUE));
+        return $token;
+    }
+    //根据机器码获取用户信息
+    public function getusernameBymachinenum($key){
+        $data = $this->app_model->get_one(array('machinenum' => $key));
+        if($data){
+            return $data['username'];
+        }else{
+            return "";
+        }
+    }
+
 
     //区域经理登陆调用接口
     public function login() {
         $username = safe_replace(filter_input(INPUT_GET, 'username'));
         $password = safe_replace(filter_input(INPUT_GET, 'password'));
+        //$machinenum = safe_replace(filter_input(INPUT_GET, 'machinenum'));
         if ($data = $this->app_model->get_one(array('username' => $username))) {
             $password = md5(md5($password) . $data['encrypt']);
             if ($password != $data['password']) {
                 echo json_encode(array("result" => 0,"token"=>0)); //密码不正确
             } elseif ($password == $data['password']) {
-                $token=get_token();
-                $this->app_model->update(array('ip' => ip(), 'lastlogin' => SYS_TIME,'token'=>$token), array('id' => $data['id']));
-                echo json_encode(array("result" => 1,"token"=>$token)); //成功
+                $token=  $this->get_token();
+                $this->app_model->update(array('lastloginip' => ip(), 'lastlogintime' => SYS_TIME,'token'=>$token), array('userid' => $data['userid']));
+                
+                echo json_encode(array("result" => 1,"token"=>$token,"shopname"=>$data['shopname'],"shopaddr"=>$data['shopaddr'],"machinenum"=>$data['machinenum'])); //成功
             }
         } else {
             echo json_encode(array("result" => -1,"token"=>0)); //帐号不存在
@@ -42,11 +63,20 @@ class index {
     //首页产品显示Product display
     public function productDisplay(){
         $dateline = safe_replace(filter_input(INPUT_GET, 'dateline'));
-         if (empty($dateline)) {
+        $machinenum = safe_replace(filter_input(INPUT_GET, 'machinenum'));
+        if (empty($dateline)) {
             $dateline = 0;
         }
-        
-        $sql = "select ah_chanpin.id,title,thumb,username,updatetime,price,ah_chanpin_data.content from ah_chanpin left join ah_chanpin_data on ah_chanpin.id= ah_chanpin_data.id where updatetime >'$dateline'  order by listorder desc " ;
+        if($machinenum){
+            $username=  $this->getusernameBymachinenum($machinenum);
+        }else{
+            $username="";
+        }
+        if($username){
+            $sql = "select ah_chanpin.id,title,thumb,username,updatetime,price,ah_chanpin_data.content from ah_chanpin left join ah_chanpin_data on ah_chanpin.id= ah_chanpin_data.id where updatetime >'$dateline' and  username='$username' order by listorder desc " ;
+        }else{
+            $sql = "select ah_chanpin.id,title,thumb,username,updatetime,price,ah_chanpin_data.content from ah_chanpin left join ah_chanpin_data on ah_chanpin.id= ah_chanpin_data.id where updatetime >'$dateline'  order by listorder desc " ;
+        }
         $this->app_model->query($sql);
         $data = $this->app_model->fetch_array();
         if($data){
@@ -54,6 +84,7 @@ class index {
         }else{
             $allData['data']=array();
         }
+        //将状态改为非最新状态
         $newdata = getcache("isnew" , "isnew");
          if($newdata){
             $isnewdata['product_isnew']=0;
@@ -72,7 +103,17 @@ class index {
          if (empty($dateline)) {
             $dateline = 0;
         }
-        $sql = "select ah_expert.id,title,thumb,username,updatetime,worktime,ah_expert_data.content from ah_expert left join ah_expert_data on ah_expert.id=ah_expert_data.id  order by listorder desc " ;
+        $machinenum = safe_replace(filter_input(INPUT_GET, 'machinenum'));
+        if($machinenum){
+            $username=  $this->getusernameBymachinenum($machinenum);
+        }else{
+            $username="";
+        }
+        if($username){
+            $sql = "select ah_expert.id,title,thumb,username,updatetime,worktime,ah_expert_data.content from ah_expert left join ah_expert_data on ah_expert.id=ah_expert_data.id  where updatetime>'$dateline' and  username='$username' order by listorder desc " ;
+        }  else {
+            $sql = "select ah_expert.id,title,thumb,username,updatetime,worktime,ah_expert_data.content from ah_expert left join ah_expert_data on ah_expert.id=ah_expert_data.id  where updatetime>'$dateline'  order by listorder desc " ;
+        }
         $this->app_model->query($sql);
         $data = $this->app_model->fetch_array();
         if($data){
@@ -80,6 +121,7 @@ class index {
         }else{
             $allData['data']=array();
         }
+        //将状态改为非最新状态
          $newdata = getcache("isnew" , "isnew");
          if($newdata){
             $isnewdata['product_isnew']=$newdata['product_isnew'];
