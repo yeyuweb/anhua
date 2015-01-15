@@ -13,9 +13,10 @@ class space extends admin {
 	}
 	
 	public function init() {
+                $userid=$_SESSION['userid'];
 		$TYPES = $this->template_type();
 		$page = max(intval($_GET['page']), 1);
-		$infos = $this->db->listinfo(array('siteid'=>$this->get_siteid()), '`spaceid`', $page);
+		$infos = $this->db->listinfo(array('siteid'=>$this->get_siteid(),"userid"=>$userid), '`spaceid`', $page);
 		$pages = $this->db->pages;
 		$big_menu = array('javascript:window.top.art.dialog({id:\'add\',iframe:\'?m=poster&c=space&a=add\', title:\''.L('add_space').'\', width:\'540\', height:\'320\'}, function(){var d = window.top.art.dialog({id:\'add\'}).data.iframe;var form = d.document.getElementById(\'dosubmit\');form.click();return false;}, function(){window.top.art.dialog({id:\'add\'}).close()});void(0);', L('add_space'));
 		include $this->admin_tpl('space_list');
@@ -29,6 +30,7 @@ class space extends admin {
 			$space = $this->check($_POST['space']);
 			$space['setting'] = array2string($_POST['setting']);
 			$space['siteid'] = $this->get_siteid();
+                        $space['userid']=$_SESSION['userid'];
 			$spaceid = $this->db->insert($space, true);
 			if ($spaceid) {
 				if ($space['type']=='code') {

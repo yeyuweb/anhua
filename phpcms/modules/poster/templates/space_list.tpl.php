@@ -6,7 +6,7 @@ include $this->admin_tpl('header', 'admin');
 <div class="subnav">
     <div class="content-menu ib-a blue line-x">
     <?php if(isset($big_menu)) echo '<a class="add fb" href="'.$big_menu[0].'"><em>'.$big_menu[1].'</em></a>　';?>
-    <?php echo admin::submenu($_GET['menuid'],$big_menu); ?><span>|</span><a href="javascript:window.top.art.dialog({id:'setting',iframe:'?m=poster&c=space&a=setting', title:'<?php echo L('module_setting')?>', width:'540', height:'320'}, function(){var d = window.top.art.dialog({id:'setting'}).data.iframe;var form = d.document.getElementById('dosubmit');form.click();return false;}, function(){window.top.art.dialog({id:'setting'}).close()});void(0);"><em><?php echo L('module_setting')?></em></a>
+<!--    <?php echo admin::submenu($_GET['menuid'],$big_menu); ?><span>|</span><a href="javascript:window.top.art.dialog({id:'setting',iframe:'?m=poster&c=space&a=setting', title:'<?php echo L('module_setting')?>', width:'540', height:'320'}, function(){var d = window.top.art.dialog({id:'setting'}).data.iframe;var form = d.document.getElementById('dosubmit');form.click();return false;}, function(){window.top.art.dialog({id:'setting'}).close()});void(0);"><em><?php echo L('module_setting')?></em></a>-->
     </div>
 </div>
 <div class="pad-lr-10">
@@ -39,7 +39,9 @@ if(is_array($infos)){
 	<td align="center"><?php echo $info['items']?></td>
 	<td align="center"><?php echo $info['description']?></td>
 	<td align="center">
-	<a href="?m=poster&c=space&a=public_preview&spaceid=<?php echo $info['spaceid']?>" target="_blank"><?php echo L('preview')?></a> | <a href="javascript:call(<?php echo $info['spaceid']?>);void(0);"><?php echo L('get_code')?></a> | <a href='?m=poster&c=poster&a=init&spaceid=<?php echo $info['spaceid']?>&menuid=<?php echo $_GET['menuid']?>' ><?php echo L('ad_list')?></a> | 
+<!--	<a href="?m=poster&c=space&a=public_preview&spaceid=<?php echo $info['spaceid']?>" target="_blank"><?php echo L('preview')?></a> | <a href="javascript:call(<?php echo $info['spaceid']?>);void(0);"><?php echo L('get_code')?></a> -->
+        
+        | <a href='?m=poster&c=poster&a=init&spaceid=<?php echo $info['spaceid']?>&menuid=<?php echo $_GET['menuid']?>' ><?php echo L('ad_list')?></a> | 
 	<a href="###" onclick="edit(<?php echo $info['spaceid']?>, '<?php echo addslashes(new_html_special_chars($info['name']))?>')" title="<?php echo L('edit')?>" ><?php echo L('edit')?></a> | 
 	<a href='?m=poster&c=space&a=delete&spaceid=<?php echo $info['spaceid']?>' onClick="return confirm('<?php echo L('confirm', array('message' => addslashes(new_html_special_chars($info['name']))))?>')"><?php echo L('delete')?></a>
 	| <a href="index.php?m=poster&c=poster&a=add&spaceid=<?php echo $info['spaceid']?>&menuid=<?php echo $_GET['menuid']?>&pc_hash=<?php echo $_SESSION['pc_hash']?>">添加广告</a>
