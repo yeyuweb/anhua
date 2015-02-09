@@ -100,8 +100,8 @@ class category extends admin {
 				$_POST['info']['catname'] = safe_replace($_POST['info']['catname']);
 				$_POST['info']['catname'] = str_replace(array('%'),'',$_POST['info']['catname']);
 				if($_POST['info']['type']!=2) {
-					if($_POST['info']['catdir']=='') showmessage(L('input_dirname'));
-					if(!$this->public_check_catdir(0,$_POST['info']['catdir'])) showmessage(L('catname_have_exists'));
+//					if($_POST['info']['catdir']=='') showmessage(L('input_dirname'));
+//					if(!$this->public_check_catdir(0,$_POST['info']['catdir'])) showmessage(L('catname_have_exists'));
 				}
 			}
 			
@@ -133,7 +133,19 @@ class category extends admin {
 				$catname = CHARSET == 'gbk' ? $_POST['info']['catname'] : iconv('utf-8','gbk',$_POST['info']['catname']);
 				$letters = gbk_to_pinyin($catname);
 				$_POST['info']['letter'] = strtolower(implode('', $letters));
+                                
 				$catid = $this->db->insert($_POST['info'], true);
+                                $des=$_POST['info']['description'];
+                                if(strpos($des,",") || strpos($des,"，")){
+                                    $des=  str_replace("，", ",", $des);
+                                    $mach_arr=  explode(",", $des);
+                                    foreach ($mach_arr as $val){
+                                        if(!empty($val)){
+                                        $sql="insert category_machine(catid,machenum) values(".$catid.",".$val.")";
+                                        $this->db->query($sql);
+                                        }
+                                    }
+                                }
 				$this->update_priv($catid, $_POST['priv_roleid']);
 				$this->update_priv($catid, $_POST['priv_groupid'],0);
 			} else {//批量添加
@@ -265,6 +277,19 @@ class category extends admin {
 			}
 			
 			$this->db->update($_POST['info'],array('catid'=>$catid,'siteid'=>$this->siteid));
+                        $des=$_POST['info']['description'];
+                        if(strpos($des,",") || strpos($des,"，")){
+                            $sql="delete from category_machine where catid='$catid'";
+                            $this->db->query($sql);
+                            $des=  str_replace("，", ",", $des);
+                            $mach_arr=  explode(",", $des);
+                            foreach ($mach_arr as $val){
+                                if(!empty($val)){
+                                $sql="insert category_machine(catid,machenum) values(".$catid.",".$val.")";
+                                $this->db->query($sql);
+                                }
+                            }
+                        }
 			$this->update_priv($catid, $_POST['priv_roleid']);
 			$this->update_priv($catid, $_POST['priv_groupid'],0);
 			$this->cache();

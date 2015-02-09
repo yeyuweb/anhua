@@ -6,7 +6,7 @@ include $this->admin_tpl('header', 'admin');
 <div class="subnav">
     <div class="content-menu ib-a blue line-x">
     <?php if(isset($big_menu)) echo '<a class="add fb" href="'.$big_menu[0].'"><em>'.$big_menu[1].'</em></a>　';?>
-    <?php echo admin::submenu($_GET['menuid'],$big_menu); ?><span>|</span><a href="javascript:window.top.art.dialog({id:'setting',iframe:'?m=poster&c=space&a=setting', title:'<?php echo L('module_setting')?>', width:'540', height:'320'}, function(){var d = window.top.art.dialog({id:'setting'}).data.iframe;var form = d.document.getElementById('dosubmit');form.click();return false;}, function(){window.top.art.dialog({id:'setting'}).close()});void(0);"><em><?php echo L('module_setting')?></em></a>
+   <!-- <?php echo admin::submenu($_GET['menuid'],$big_menu); ?><span>|</span><a href="javascript:window.top.art.dialog({id:'setting',iframe:'?m=poster&c=space&a=setting', title:'<?php echo L('module_setting')?>', width:'540', height:'320'}, function(){var d = window.top.art.dialog({id:'setting'}).data.iframe;var form = d.document.getElementById('dosubmit');form.click();return false;}, function(){window.top.art.dialog({id:'setting'}).close()});void(0);"><em><?php echo L('module_setting')?></em></a>-->
     </div>
 </div>
 
@@ -46,7 +46,13 @@ if(is_array($infos)){
 	<td align="center"><?php if($info['disabled']) { echo L('stop'); } elseif((strtotime($info['enddate'])<SYS_TIME) && (strtotime($info['enddate'])>0)) { echo L('past'); } else { echo L('start'); }?></td>
 	<td align="center"><?php echo $info['clicks']?></td>
 	<td align="center"><?php echo format::date($info['addtime'], 1);?></td>
-	<td align="center"><a href="index.php?m=poster&c=poster&a=edit&id=<?php echo $info['id'];?>&pc_hash=<?php echo $_SESSION['pc_hash'];?>&menuid=<?php echo $_GET['menuid']?>" ><?php echo L('edit')?></a>|<a href="?m=poster&c=poster&a=stat&id=<?php echo $info['id']?>&spaceid=<?php echo $_GET['spaceid'];?>"><?php echo L('stat')?></a></td>
+	<td align="center"><a href="index.php?m=poster&c=poster&a=edit&id=<?php echo $info['id'];?>&pc_hash=<?php echo $_SESSION['pc_hash'];?>&menuid=<?php echo $_GET['menuid']?>" ><?php echo L('edit')?></a>|
+            
+            
+<!--            <a href="?m=poster&c=poster&a=stat&id=<?php echo $info['id']?>&spaceid=<?php echo $_GET['spaceid'];?>"><?php echo L('stat')?></a>-->
+        
+        
+        </td>
 	</tr>
 <?php 
 	}
