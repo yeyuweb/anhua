@@ -137,28 +137,10 @@ class content extends admin {
 					$_POST['info']['status'] = 99;
 				}
 				$this->db->add_content($_POST['info']);
-				if(isset($_POST['dosubmit'])) {
-					showmessage(L('add_success').L('2s_close'),'blank','','','function set_time() {$("#secondid").html(1);}setTimeout("set_time()", 500);setTimeout("window.close()", 1200);');
-				} else {
-					showmessage(L('add_success'),HTTP_REFERER);
-				}
-			} else {
-				//单网页
-				$this->page_db = pc_base::load_model('page_model');
-				$style_font_weight = $_POST['style_font_weight'] ? 'font-weight:'.strip_tags($_POST['style_font_weight']) : '';
-				$_POST['info']['style'] = strip_tags($_POST['style_color']).';'.$style_font_weight;
-				
-				if($_POST['edit']) {
-					$this->page_db->update($_POST['info'],array('catid'=>$catid));
-				} else {
-					$catid = $this->page_db->insert($_POST['info'],1);
-				}
-				$this->page_db->create_html($catid,$_POST['info']);
-				$forward = HTTP_REFERER;
-			}
-			 //更新状态
+                                 //更新状态
                         if($modelid=="12" || $modelid=="14"){
-                         $newdata = getcache("isnew" , "isnew");
+                          $parentid=  catposparentid($catid);
+                         $newdata = getcache("isnew_".$parentid , "isnew");
                          if($newdata){
                              if($modelid=="12"){
                                 $isnewdata['product_isnew']=1;
@@ -178,8 +160,28 @@ class content extends admin {
                                 $isnewdata['expert_isnew']=1;
                             }
                          }
-                        setcache("isnew", $isnewdata, "isnew");
+                        setcache("isnew_".$parentid, $isnewdata, "isnew");
                         }
+				if(isset($_POST['dosubmit'])) {
+					showmessage(L('add_success').L('2s_close'),'blank','','','function set_time() {$("#secondid").html(1);}setTimeout("set_time()", 500);setTimeout("window.close()", 1200);');
+				} else {
+					showmessage(L('add_success'),HTTP_REFERER);
+				}
+			} else {
+				//单网页
+				$this->page_db = pc_base::load_model('page_model');
+				$style_font_weight = $_POST['style_font_weight'] ? 'font-weight:'.strip_tags($_POST['style_font_weight']) : '';
+				$_POST['info']['style'] = strip_tags($_POST['style_color']).';'.$style_font_weight;
+				
+				if($_POST['edit']) {
+					$this->page_db->update($_POST['info'],array('catid'=>$catid));
+				} else {
+					$catid = $this->page_db->insert($_POST['info'],1);
+				}
+				$this->page_db->create_html($catid,$_POST['info']);
+				$forward = HTTP_REFERER;
+			}
+			
 			showmessage(L('add_success'),$forward);
                        
 		} else {
@@ -246,7 +248,8 @@ class content extends admin {
 				$this->db->edit_content($_POST['info'],$id);
                                  //更新状态
                         if($modelid=="12" || $modelid=="14"){
-                         $newdata = getcache("isnew" , "isnew");
+                            $parentid=  catposparentid($catid);
+                         $newdata = getcache("isnew_".$parentid , "isnew");
                          if($newdata){
                              if($modelid=="12"){
                                 $isnewdata['product_isnew']=1;
@@ -266,7 +269,7 @@ class content extends admin {
                                 $isnewdata['expert_isnew']=1;
                             }
                          }
-                        setcache("isnew", $isnewdata, "isnew");
+                        setcache("isnew_".$parentid, $isnewdata, "isnew");
                         }
 				if(isset($_POST['dosubmit'])) {
 					showmessage(L('update_success').L('2s_close'),'blank','','','function set_time() {$("#secondid").html(1);}setTimeout("set_time()", 500);setTimeout("window.close()", 1200);');
@@ -388,6 +391,9 @@ class content extends admin {
 					$commentid = id_encode('content_'.$catid, $id, $siteid);
 					$this->comment->del($commentid, $siteid, $id, $catid);
 				}
+                               $dates=time();
+                               $sql="insert into ah_del_id(contentid,modelid,dateline) values('$id','$modelid','$dates')";
+                               $this->db->query($sql);
 				
  			}
 			//更新栏目统计

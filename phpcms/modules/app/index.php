@@ -84,10 +84,14 @@ class index {
     }
     //首页产品显示Product display
     public function productDisplay(){
-        $dateline = safe_replace(filter_input(INPUT_GET, 'dateline'));
+        $dateline = safe_replace(filter_input(INPUT_GET, 'dateline'));//产品列表时间戳
+        $deldateline= safe_replace(filter_input(INPUT_GET, 'deldateline'));//删除产品列表时间戳
         $machinenum = safe_replace(filter_input(INPUT_GET, 'machinenum'));
         if (empty($dateline)) {
             $dateline = 0;
+        }
+        if (empty($deldateline)) {
+            $deldateline = 0;
         }
         if($machinenum){
             $catids=  $this->getcatidBymachinenum($machinenum);
@@ -95,9 +99,13 @@ class index {
             $catids=0;
         }
         if($catids){
-            $sql = "select ah_chanpin.id,title,thumb,username,updatetime,price,ah_chanpin_data.content from ah_chanpin left join ah_chanpin_data on ah_chanpin.id= ah_chanpin_data.id where updatetime >'$dateline' and  catid in($catids) order by listorder desc " ;
+            $sql = "select ah_chanpin.id,title,thumb,username,updatetime,price,ah_chanpin_data.content from ah_chanpin left join ah_chanpin_data on ah_chanpin.id= ah_chanpin_data.id where updatetime >'$dateline' and  catid in($catids) order by updatetime desc " ;
         }else{
-            $sql = "select ah_chanpin.id,title,thumb,username,updatetime,price,ah_chanpin_data.content from ah_chanpin left join ah_chanpin_data on ah_chanpin.id= ah_chanpin_data.id where updatetime >'$dateline'  order by listorder desc " ;
+             $allData['data']=array();
+             echo json_encode($allData);  
+             exit;
+            
+            //$sql = "select ah_chanpin.id,title,thumb,username,updatetime,price,ah_chanpin_data.content from ah_chanpin left join ah_chanpin_data on ah_chanpin.id= ah_chanpin_data.id where updatetime >'$dateline'  order by updatetime desc " ;
         }
         $this->app_model->query($sql);
         $data = $this->app_model->fetch_array();
@@ -120,13 +128,32 @@ class index {
 //            $isnewdata['expert_isnew']=1;
 //         }
 //          setcache("isnew_".$mendianid, $isnewdata, "isnew");
+        $sql="select contentid,dateline from ah_del_id where modelid=12 and dateline>'$deldateline' order by dateline asc";
+        $this->app_model->query($sql);
+        $data = $this->app_model->fetch_array();
+        $max_date=0;
+        if($data){
+            foreach($data as $ids){
+                $id[]=$ids['contentid'];
+                $max_date=$ids['dateline'];
+            }
+            $id_str=  implode(",", $id);
+        }else{
+            $id_str="";
+        }
+        $allData['delid']=$id_str;
+        $allData['maxdate']=$max_date;
         echo json_encode($allData);  
     }
     
      //首页专家显示 expert display
     public function expertDisplay(){
          $dateline = safe_replace(filter_input(INPUT_GET, 'dateline'));
-         if (empty($dateline)) {
+         $deldateline= safe_replace(filter_input(INPUT_GET, 'deldateline'));//删除产品列表时间戳
+         if (empty($deldateline)) {
+            $deldateline = 0;
+        }
+        if (empty($dateline)) {
             $dateline = 0;
         }
         $machinenum = safe_replace(filter_input(INPUT_GET, 'machinenum'));
@@ -136,13 +163,20 @@ class index {
             $catids=0;
         }
         if($catids){
-            $sql = "select ah_expert.id,title,thumb,username,updatetime,worktime,ah_expert_data.content from ah_expert left join ah_expert_data on ah_expert.id=ah_expert_data.id  where updatetime>'$dateline' and  catid in($catids) order by listorder desc " ;
+            $sql = "select ah_expert.id,title,thumb,username,updatetime,worktime,ah_expert_data.content from ah_expert left join ah_expert_data on ah_expert.id=ah_expert_data.id  where updatetime>'$dateline' and  catid in($catids) order by updatetime desc " ;
         }  else {
-            $sql = "select ah_expert.id,title,thumb,username,updatetime,worktime,ah_expert_data.content from ah_expert left join ah_expert_data on ah_expert.id=ah_expert_data.id  where updatetime>'$dateline'  order by listorder desc " ;
+            //$sql = "select ah_expert.id,title,thumb,username,updatetime,worktime,ah_expert_data.content from ah_expert left join ah_expert_data on ah_expert.id=ah_expert_data.id  where updatetime>'$dateline'  order by updatetime desc " ;
+            $allData['data']=array();
+             echo json_encode($allData);  
+             exit;
+            
         }
         $this->app_model->query($sql);
         $data = $this->app_model->fetch_array();
         if($data){
+            foreach($data as $key=>$val){
+                $data[$key]['content']=strip_tags(safe_replace($val['content']));
+            }
             $allData['data']=$data;
         }else{
             $allData['data']=array();
@@ -158,7 +192,21 @@ class index {
 //            $isnewdata['expert_isnew']=0;
 //         }
 //          setcache("isnew_".$mendianid, $isnewdata, "isnew");
-         
+        $sql="select contentid,dateline from ah_del_id where modelid=14 and dateline>'$deldateline' order by dateline asc";
+        $this->app_model->query($sql);
+        $data = $this->app_model->fetch_array();
+        $max_date=0;
+        if($data){
+            foreach($data as $ids){
+                $id[]=$ids['contentid'];
+                $max_date=$ids['dateline'];
+            }
+            $id_str=  implode(",", $id);
+        }else{
+            $id_str="";
+        }
+        $allData['delid']=$id_str;
+        $allData['maxdate']=$max_date;
         echo json_encode($allData);  
     }
     
@@ -176,9 +224,11 @@ class index {
             $catids=0;
         }
         if($catids){
-            $sql = "select ah_video.id,title,updatetime,ah_video_data.video_url from ah_video left join ah_video_data on ah_video.id=ah_video_data.id  where updatetime>'$dateline' and  catid in($catids) order by listorder desc " ;
+            $sql = "select ah_video.id,title,updatetime,ah_video_data.video_url from ah_video left join ah_video_data on ah_video.id=ah_video_data.id  where updatetime>'$dateline' and  catid in($catids) order by updatetime desc " ;
         }  else {
-            $sql = "select ah_video.id,title,updatetime,ah_video_data.video_url from ah_video left join ah_video_data on ah_video.id=ah_video_data.id  where updatetime>'$dateline' order by listorder desc " ;
+             echo json_encode(array());  
+             exit;
+            //$sql = "select ah_video.id,title,updatetime,ah_video_data.video_url from ah_video left join ah_video_data on ah_video.id=ah_video_data.id  where updatetime>'$dateline' order by updatetime desc " ;
         }
         $this->app_model->query($sql);
         $data = $this->app_model->fetch_array();
@@ -204,6 +254,10 @@ class index {
     public function yuliuDisplay(){
         $dateline = safe_replace(filter_input(INPUT_GET, 'dateline'));
         $machinenum = safe_replace(filter_input(INPUT_GET, 'machinenum'));
+        $deldateline= safe_replace(filter_input(INPUT_GET, 'deldateline'));//删除产品列表时间戳
+        if (empty($deldateline)) {
+            $deldateline = 0;
+        }
         if (empty($dateline)) {
             $dateline = 0;
         }
@@ -213,20 +267,38 @@ class index {
             $catids=0;
         }
         if($catids){
-            $sql = "select ah_yuliu.id,title,thumb,username,updatetime,price,ah_yuliu_data.content from ah_yuliu left join ah_yuliu_data on ah_yuliu.id= ah_yuliu_data.id where updatetime >'$dateline' and  catid in($catids) order by listorder desc " ;
+            $sql = "select ah_yuliu.id,title,thumb,username,updatetime,price,ah_yuliu_data.content from ah_yuliu left join ah_yuliu_data on ah_yuliu.id= ah_yuliu_data.id where updatetime >'$dateline' and  catid in($catids) order by updatetime desc " ;
         }else{
-            $sql = "select ah_yuliu.id,title,thumb,username,updatetime,price,ah_yuliu_data.content from ah_yuliu left join ah_yuliu_data on ah_yuliu.id= ah_yuliu_data.id where updatetime >'$dateline'  order by listorder desc " ;
+            $allData['data']=array();
+            echo json_encode($allData);  
+            exit;
+            //$sql = "select ah_yuliu.id,title,thumb,username,updatetime,price,ah_yuliu_data.content from ah_yuliu left join ah_yuliu_data on ah_yuliu.id= ah_yuliu_data.id where updatetime >'$dateline'  order by updatetime desc " ;
         }
         $this->app_model->query($sql);
         $data = $this->app_model->fetch_array();
         if($data){
             foreach($data as $key=>$val){
-                $data[$key]['content']=safe_replace($val['content']);
+                $data[$key]['content']=  strip_tags(safe_replace($val['content']));
             }
             $allData['data']=$data;
         }else{
             $allData['data']=array();
         }
+        $sql="select contentid,dateline from ah_del_id where modelid=16 and dateline>'$deldateline' order by dateline asc";
+        $this->app_model->query($sql);
+        $data = $this->app_model->fetch_array();
+        $max_date=0;
+        if($data){
+            foreach($data as $ids){
+                $id[]=$ids['contentid'];
+                $max_date=$ids['dateline'];
+            }
+            $id_str=  implode(",", $id);
+        }else{
+            $id_str="";
+        }
+        $allData['delid']=$id_str;
+        $allData['maxdate']=$max_date;
         echo json_encode($allData);  
     }
     //检查产品与专家是否更新（暂时弃用）
@@ -306,6 +378,18 @@ class index {
         }
         return $userid;
     }
+    //检查机器编号是否绑定账号
+    public function isbangding(){
+        $machinenum = safe_replace(filter_input(INPUT_GET, 'machinenum'));
+        $mendianid=$this->getmendianidBymachinenum($machinenum);
+        if($mendianid){
+            echo json_encode(array("state"=>1));//已经绑定
+        }else{
+            echo json_encode(array("state"=>0));//未绑定
+        }
+        
+    }
+    
 
    
 
